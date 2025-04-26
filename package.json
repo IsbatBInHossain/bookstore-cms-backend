@@ -20,12 +20,14 @@
   },
   "homepage": "https://github.com/IsbatBInHossain/bookstore-cms-backend#readme",
   "dependencies": {
+    "@prisma/client": "^6.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "helmet": "^8.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prisma": "^6.6.0"
   }
 }
