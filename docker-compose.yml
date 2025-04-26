@@ -15,7 +15,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - db
-    command: npm run dev
+    command: npm run dev -- -L
     restart: unless-stopped
 
   db:
