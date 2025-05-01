@@ -1,7 +1,9 @@
 const express = require('express')
-require('dotenv').config() // Load environment variables early
+require('dotenv').config()
 const cors = require('cors')
 const helmet = require('helmet')
+const logger = require('./lib/logger')
+const pinoHttp = require('pino-http')
 
 // Import routers
 const authRoutes = require('./routes/auth.routes')
@@ -16,6 +18,7 @@ app.use(cors()) // Enable CORS
 app.use(helmet()) // Set various HTTP security headers
 app.use(express.json()) // Parse incoming JSON requests
 app.use(express.urlencoded({ extended: true })) // Parse incoming URL-encoded data
+app.use(pinoHttp({ logger })) // Add logger
 // --- End Core Middleware ---
 
 // --- API Routes ---
@@ -24,23 +27,12 @@ app.use('/api/users', userRoutes)
 // --- End API Routes ---
 
 // Heartbeat route for basic uptime/health check
-app.get('/heartbeat', (req, res) => {
+app.get('/api/heartbeat', (req, res) => {
   res.status(200).json({
     message: 'Server is running',
-    timestamp: Date.now(),
+    timestamp: new Date().toISOString(),
   })
 })
-
-// TODO: Replace with centralized Error Handler later
-app.use((err, req, res, next) => {
-  console.error('Unhandled Error:', err)
-
-  res.status(err.statusCode || 500).json({
-    error: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  })
-})
-// TODO: Replace basic error handler with a more detailed centralized error middleware
 
 // --- Server Startup ---
 const PORT = process.env.PORT || 3000
