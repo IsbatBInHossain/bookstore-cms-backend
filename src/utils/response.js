@@ -18,7 +18,7 @@ const sendSuccess = (
   if (data != null) {
     response.data = data
   }
-  res.statusCode(statusCode).json(response)
+  res.status(statusCode).json(response)
 }
 
 /**
@@ -44,7 +44,7 @@ const sendError = (
   }
   if (errorCode != null) errorResponse.error.code = errorCode
   if (details != null) errorResponse.details = details
-  res.statusCode(statusCode).json(errorResponse)
+  res.status(statusCode).json(errorResponse)
 }
 
 module.exports = {

@@ -1,6 +1,9 @@
 const prisma = require('../lib/prisma')
 const { verifyPassword } = require('../utils/password')
 const { generateToken } = require('../utils/jwt')
+const logger = require('../lib/logger')
+const ApiError = require('../utils/ApiError')
+const { sendSuccess } = require('../utils/response')
 
 /**
  * Authenticates a user with email and password, and returns a JWT token on success.
@@ -12,44 +15,50 @@ const { generateToken } = require('../utils/jwt')
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body
 
+  // TODO: Replace with validation middleware
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' })
+    return next(
+      new ApiError(
+        400,
+        'Email and password are required',
+        true,
+        'VALIDATION_ERROR'
+      )
+    )
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    const user = await prisma.user.findUnique({ where: { email } })
 
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' })
+    // Combine user not found and password mismatch into one error type for security
+    if (!user || !(await verifyPassword(user.password, password))) {
+      // Throw specific ApiError for invalid credentials
+      throw new ApiError(
+        401,
+        'Invalid credentials provided',
+        true,
+        'INVALID_CREDENTIALS'
+      )
     }
 
-    const isMatch = await verifyPassword(user.password, password)
-
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' })
-    }
-
-    const payload = {
-      userId: user.id,
-      email: user.email,
-    }
-
+    const payload = { userId: user.id, email: user.email }
     const token = generateToken(payload)
 
-    res.status(200).json({
-      message: 'Login successful',
+    logger.info(
+      { userId: user.id, email: user.email },
+      'User logged in successfully'
+    )
+
+    sendSuccess(res, 200, 'Login successful', {
       token: token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      user: { id: user.id, name: user.name, email: user.email },
     })
   } catch (error) {
-    console.error('Login error:', error)
-    res.status(500).json({ error: 'Login failed due to server error' })
+    logger.error(
+      { err: error, email: req.body.email },
+      'Login attempt failed in controller'
+    )
+    next(error) // Pass error to the centralized handler
   }
 }
 
