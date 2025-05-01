@@ -4,15 +4,25 @@ class ApiError extends Error {
    * @param {number} statusCode - HTTP status code.
    * @param {string} message - Error message.
    * @param {boolean} [isOperational=true] - Indicates if the error is operational (expected) vs. a bug.
-   * @param {string|null} [errorCode=null] - Optional application-specific error code.
+   * @param {string} [errorCode=null] - Optional application-specific error code.
+   * @param {string} [stack=''] - Optional error stack trace.
    */
-  constructor(statusCode, message, isOperational = true, errorCode = null) {
+  constructor(
+    statusCode,
+    message,
+    isOperational = true,
+    errorCode = null,
+    stack = ''
+  ) {
     super(message)
-    this.name = this.constructor.name
     this.statusCode = statusCode
-    this.isOperational = isOperational
+    this.isOperational = isOperational // Helps distinguish known errors from bugs
     this.errorCode = errorCode
-    Error.captureStackTrace(this, this.constructor)
+    if (stack) {
+      this.stack = stack
+    } else {
+      Error.captureStackTrace(this, this.constructor) // Capture stack trace automatically
+    }
   }
 }
 
