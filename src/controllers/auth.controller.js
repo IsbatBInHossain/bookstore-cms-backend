@@ -15,18 +15,6 @@ const { sendSuccess } = require('../utils/response')
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body
 
-  // TODO: Replace with validation middleware
-  if (!email || !password) {
-    return next(
-      new ApiError(
-        400,
-        'Email and password are required',
-        true,
-        'VALIDATION_ERROR'
-      )
-    )
-  }
-
   try {
     const user = await prisma.user.findUnique({ where: { email } })
 

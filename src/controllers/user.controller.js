@@ -13,19 +13,6 @@ const ApiError = require('../utils/ApiError')
 const createUser = async (req, res, next) => {
   const { name, email, password } = req.body
 
-  // TODO: Replace with validation middleware
-  if (!name || !email || !password) {
-    // Throw an ApiError for validation issues
-    return next(
-      new ApiError(
-        400,
-        'Missing required fields: name, email, password',
-        true,
-        'VALIDATION_ERROR'
-      )
-    )
-  }
-
   try {
     const hashedPassword = await hashPassword(password)
     const newUser = await prisma.user.create({
