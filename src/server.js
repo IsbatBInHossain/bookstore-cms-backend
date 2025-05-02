@@ -99,22 +99,33 @@ app.use((err, req, res, next) => {
 
   // If it's a non-operational error in production, hide details from the client
   if (process.env.NODE_ENV === 'production' && !error.isOperational) {
-    // Send generic error response without internal details
     sendError(res, 500, 'An unexpected error occurred on the server.')
   } else {
-    // Send detailed error response (operational errors or in development)
+    // Determine what details to send
+    let responseDetails = null
+    if (error.details) {
+      // If details (like validation errors) exist on the ApiError
+      responseDetails = error.details
+    } else if (
+      process.env.NODE_ENV === 'development' &&
+      !error.isOperational &&
+      error.stack
+    ) {
+      // Only fallback to stack for unexpected errors in development
+      responseDetails = error.stack
+    }
+
+    // Send detailed error response
     sendError(
       res,
       error.statusCode,
       error.message,
       error.errorCode,
-      // Only include stack in development for non-operational errors
-      process.env.NODE_ENV === 'development' && !error.isOperational
-        ? error.stack
-        : null
+      responseDetails
     )
   }
 })
+
 // --- Server Startup ---
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {

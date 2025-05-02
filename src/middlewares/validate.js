@@ -46,9 +46,9 @@ const validate = schema => (req, res, next) => {
         400, // Bad Request
         'Input validation failed',
         true, // Operational error
-        'VALIDATION_ERROR',
-        formattedErrors // Pass formatted errors in details
+        'VALIDATION_ERROR'
       )
+      apiError.details = formattedErrors
       return next(apiError) // Pass to centralized error handler
     }
 
