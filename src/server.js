@@ -35,6 +35,14 @@ app.get('/api/heartbeat', (req, res) => {
   })
 })
 
+// Catch all error Route
+app.use((req, res, next) => {
+  // Create a more descriptive message
+  const message = `The requested resource was not found on this server: ${req.method} ${req.originalUrl}`
+  const error = new ApiError(404, message, true, 'ROUTE_NOT_FOUND')
+  next(error)
+})
+
 // Centralized Error Hanlder
 app.use((err, req, res, next) => {
   let error = err
