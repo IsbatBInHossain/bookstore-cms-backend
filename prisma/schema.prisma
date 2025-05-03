@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/prisma-client-js"
+  output   = "../prisma/generated/prisma-client-js" 
 }
 
 datasource db {
@@ -8,15 +8,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Test schema for user
-model User {
-  id String @id @default(uuid())
-  name String 
-  email String @unique
-  password String
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+// Define Roles Enum
+enum Role {
+  CUSTOMER
+  ADMIN
+  // Add other roles like EDITOR later if needed
+}
 
-  //Indexes
-  @@index([name, email, created_at, updated_at])
+model User {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  // --- Add Role Field ---
+  role       Role     @default(CUSTOMER)
+  // -----------------------
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt // Use @updatedAt for auto-update
+
+  // Indexes (using @updatedAt is more standard for update tracking)
+  @@index([name, email, role, created_at, updated_at])
 }
