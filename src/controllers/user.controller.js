@@ -21,13 +21,14 @@ const createUser = async (req, res, next) => {
         id: true,
         name: true,
         email: true,
+        role: true,
         created_at: true,
         updated_at: true,
       },
     })
 
     logger.info(
-      { userId: newUser.id, email: newUser.email },
+      { userId: newUser.id, email: newUser.email, role: newUser.role },
       'User created successfully'
     )
     sendSuccess(res, 201, 'User created successfully', { user: newUser })

@@ -29,21 +29,26 @@ const loginUser = async (req, res, next) => {
       )
     }
 
-    const payload = { userId: user.id, email: user.email }
+    const payload = { userId: user.id, email: user.email, role: user.role }
     const token = generateToken(payload)
 
     logger.info(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       'User logged in successfully'
     )
 
     sendSuccess(res, 200, 'Login successful', {
       token: token,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     })
   } catch (error) {
     logger.error(
-      { err: error, email: req.body.email },
+      { err: error, email: req.body.email, role: user.role },
       'Login attempt failed in controller'
     )
     next(error) // Pass error to the centralized handler
