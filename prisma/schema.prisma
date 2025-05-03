@@ -12,7 +12,6 @@ datasource db {
 enum Role {
   CUSTOMER
   ADMIN
-  // Add other roles like EDITOR later if needed
 }
 
 model User {
@@ -20,7 +19,6 @@ model User {
   name       String
   email      String   @unique
   password   String
-  // --- Add Role Field ---
   role       Role     @default(CUSTOMER)
   // -----------------------
   created_at DateTime @default(now())
@@ -28,4 +26,88 @@ model User {
 
   // Indexes (using @updatedAt is more standard for update tracking)
   @@index([name, email, role, created_at, updated_at])
+}
+// --- Catalog Models ---
+model Author {
+  id        String   @id @default(uuid())
+  name      String 
+  bio       String?  @db.Text 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  books     Book[]   // Relation to Books (many-to-many)
+}
+
+model Publisher {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  books     Book[]   // Relation to Books (one-to-many)
+}
+
+model Genre {
+  id        String   @id @default(uuid())
+  name      String   @unique // Assuming genre names are unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  books     Book[]   // Relation to Books (many-to-many)
+}
+
+model Book {
+  id               String   @id @default(uuid())
+  googleBooksId    String?  @unique // Added: Store Google's Volume ID
+  title            String
+  
+  // identifiers
+  isbn10           String?  @unique
+  isbn13           String?  @unique
+
+  description      String?  @db.Text
+  coverImageUrl    String?
+  // publicationYear replaced by publishedDate:
+  publishedDate    String? 
+  pageCount        Int?   
+  language         String? 
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // --- Relationships
+  publisherId      String?
+  publisher        Publisher? @relation(fields: [publisherId], references: [id])
+  authors          Author[]
+  genres           Genre[]
+  inventoryItem    InventoryItem?
+
+  // --- Indexes ---
+  @@index([googleBooksId])
+  @@index([title])
+  @@index([isbn10])     
+  @@index([isbn13])  
+  @@index([publisherId])
+  @@index([createdAt])
+}
+
+// --- Inventory Model ---
+model InventoryItem {
+  id             String    @id @default(uuid())
+  sku            String?   @unique 
+  price          Float     // Use Float or Decimal depending on precision needs
+  stockQuantity  Int       @default(0)
+  isActive       Boolean   @default(true) // Is the item currently available for sale?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // --- Relationships ---
+  bookId         String    @unique // One-to-one relation with Book
+  book           Book      @relation(fields: [bookId], references: [id], onDelete: Cascade) // Cascade delete inventory if book is deleted
+
+  // --- Indexes ---
+  @@index([sku])
+  @@index([bookId])
+  @@index([isActive])
 }
