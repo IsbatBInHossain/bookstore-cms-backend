@@ -2,6 +2,7 @@ const prisma = require('../lib/prisma')
 const { hashPassword } = require('../utils/password')
 const logger = require('../lib/logger')
 const ApiError = require('../utils/ApiError')
+const { sendSuccess } = require('../utils/response')
 
 /**
  * Creates a new user with hashed password and stores it in the database.

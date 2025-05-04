@@ -8,26 +8,24 @@ const logger = require('../lib/logger')
  */
 const validate = schema => (req, res, next) => {
   try {
-    // Create an object containing only the parts of the request the schema expects
     const objectToValidate = {}
-    if (schema.shape.params) {
-      objectToValidate.params = req.params
-    }
-    if (schema.shape.body) {
-      objectToValidate.body = req.body
-    }
-    if (schema.shape.query) {
-      objectToValidate.query = req.query
-    }
+    // Check specifically if the schema *expects* these parts
+    const expectsParams = !!schema.shape.params
+    const expectsBody = !!schema.shape.body
+    const expectsQuery = !!schema.shape.query
+
+    if (expectsParams) objectToValidate.params = req.params
+    if (expectsBody) objectToValidate.body = req.body
+    if (expectsQuery) objectToValidate.query = req.query
 
     // Validate the request data
     const validatedData = schema.parse(objectToValidate)
 
-    // Attach validated data to request for downstream use
-    // This replaces req.body etc. with the potentially transformed/validated data
-    Object.assign(req, validatedData)
+    // Merge validated parts back carefully
+    if (expectsParams && validatedData.params) req.params = validatedData.params
+    if (expectsBody && validatedData.body) req.body = validatedData.body
+    if (expectsQuery && validatedData.query) req.query = validatedData.query
 
-    // Validation passed, proceed to the next middleware/controller
     return next()
   } catch (error) {
     // Check if it's a Zod validation error

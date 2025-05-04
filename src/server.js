@@ -13,6 +13,7 @@ const { Prisma } = require('../prisma/generated/prisma-client-js')
 // Import routers
 const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
+const catalogRoutes = require('./routes/catalog.routes')
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use(pinoHttp({ logger })) // Add logger
 // --- API Routes ---
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/catalog', catalogRoutes)
 
 // Heartbeat route for basic uptime/health check
 app.get('/api/heartbeat', (req, res) => {
