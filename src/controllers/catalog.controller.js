@@ -34,7 +34,7 @@ const createAuthor = async (req, res, next) => {
   const { name, bio } = req.body
   try {
     // Check if author already exists
-    const existingAuthor = await prisma.author.findUnique({ where: { name } })
+    const existingAuthor = await prisma.author.findFirst({ where: { name } })
     if (existingAuthor) {
       throw new ApiError(
         409,
